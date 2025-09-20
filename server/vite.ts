@@ -68,17 +68,34 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  // Try multiple likely locations for the built client (dist/public). When
+  // the server is bundled the relative paths can change, so prefer checking
+  // a set of candidates and pick the first that exists.
+  const candidates = [
+    // when running from project root
+    path.resolve(process.cwd(), "dist", "public"),
+    // when running from server directory (unbundled)
+    path.resolve(import.meta.dirname, "..", "dist", "public"),
+    // when the build is placed next to the server bundle
+    path.resolve(import.meta.dirname, "public"),
+    // fallback: client/dist inside repo (unlikely but safe)
+    path.resolve(import.meta.dirname, "..", "client", "dist", "public"),
+  ];
 
-  if (!fs.existsSync(distPath)) {
+  const distPath = candidates.find((p) => fs.existsSync(p));
+
+  if (!distPath) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory. Looked for:
+  ${candidates.join("\n  ")}
+Make sure to run 'npm run build' and that the client build output is in one of the above locations.`,
     );
   }
 
+  log(`serving static assets from ${distPath}`);
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
+  // fall through to index.html for SPA routing
   app.use("*", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });

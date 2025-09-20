@@ -61,11 +61,31 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  // Some platforms (notably certain Windows builds) emit an 'error'
+  // asynchronously when using the `reusePort` option (ENOTSUP). To
+  // handle that, attach an error listener before calling listen and
+  // fall back to a plain listen() if we see ENOTSUP.
+  let fallbackAttempted = false;
+  const onListenError = (err: any) => {
+    // handle ENOTSUP (operation not supported) by falling back
+    if (!fallbackAttempted && err && (err.code === "ENOTSUP" || err.code === "EOPNOTSUPP")) {
+      fallbackAttempted = true;
+      log(`listen with options failed (${err.code}), falling back to simple listen`);
+      // remove this listener and try the simpler listen call
+      server.removeListener("error", onListenError);
+      server.listen(port, "0.0.0.0", () => {
+        log(`serving on port ${port}`);
+      });
+    } else {
+      // rethrow/unhandled errors so they surface
+      throw err;
+    }
+  };
+
+  server.on("error", onListenError);
+  server.listen({ port, host: "0.0.0.0", reusePort: true }, () => {
+    // successful start; remove error handler
+    server.removeListener("error", onListenError);
     log(`serving on port ${port}`);
   });
 })();
