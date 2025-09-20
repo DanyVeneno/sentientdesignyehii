@@ -7,10 +7,10 @@ import DisenoSection from "@/components/DisenoSection";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className='min-h-screen'>
       <Navigation />
       <main>
-        <section id="hero">
+        <section id='hero'>
           <Hero />
         </section>
         <ParadigmaSection />
@@ -18,16 +18,27 @@ export default function Home() {
         <PatronesSection />
         <DisenoSection />
       </main>
-      
+
       {/* Footer */}
-      <footer className="bg-muted/50 border-t border-border py-12 px-6">
-        <div className="container mx-auto max-w-4xl text-center">
-          <p className="text-muted-foreground mb-4">
-            Basado en el artículo "Sentient Design: La Nueva Frontera de la Experiencia de Usuario"
+      <footer className='bg-muted/50 border-t border-border py-12 px-6'>
+        <div className='container mx-auto max-w-4xl text-center'>
+          <p className='text-muted-foreground mb-4'>
+            Basado en el artículo "Sentient Design: La Nueva Frontera de la
+            Experiencia de Usuario"
           </p>
-          <p className="text-sm text-muted-foreground">
-            Desarrollado como una exploración interactiva de los conceptos fundamentales 
-            del diseño inteligente y la IA como material de creación.
+          <p className='text-sm text-muted-foreground'>
+            Desarrollado como una exploración interactiva de los conceptos
+            fundamentales del diseño inteligente y la IA como material de
+            creación.
+            <strong>
+              <a
+                href='https://ybestudio.tech'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                @yehiibhiiestudio
+              </a>
+            </strong>
           </p>
         </div>
       </footer>
